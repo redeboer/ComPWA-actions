@@ -19,6 +19,7 @@ jobs:
       FORCE_COLOR: yes
       GITHUB_REPO: ${{ github.event.pull_request.head.repo.full_name }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      UV_CACHE_DIR: ~/.cache/uv
       UV_PYTHON: ${{ inputs.python-version }}
     name: Execute and build documentation
     runs-on: ubuntu-24.04
@@ -26,10 +27,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
         with:
-          cache-dependency-glob: |
-            **/pyproject.toml
-            **/uv.lock
-          cache-suffix: group-doc
+          enable-cache: false
+      - name: Restore uv cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: uv-doc-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-doc-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
+            uv-doc-py${{ inputs.python-version }}
       - name: Fetch Jupyter cache
         if: inputs.specific-pip-packages == ''
         uses: actions/cache@v4
@@ -60,3 +66,4 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html
+      - run: uv cache prune --ci

@@ -36,6 +36,7 @@ jobs:
     env:
       FORCE_COLOR: 1
       TERM: xterm-256color
+      UV_CACHE_DIR: ~/.cache/uv
       UV_PYTHON: ${{ inputs.python-version }}
     if: needs.determine-hooks.outputs.skipped-hooks
     needs: determine-hooks
@@ -46,11 +47,15 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v5
         with:
-          cache-dependency-glob: |
-            **/.pre-commit-config.yaml
-            **/pyproject.toml
-            **/uv.lock
-          cache-suffix: group-pre-commit
+          enable-cache: false
+      - name: Restore uv cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: uv-sty-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-sty-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
+            uv-sty-${{ runner.os }}-py${{ inputs.python-version }}
       - name: Fetch pre-commit cache
         uses: actions/cache@v4
         with:
@@ -95,6 +100,7 @@ jobs:
           if-no-files-found: error
           name: pre-commit-changes
           path: ${{ steps.diff.outputs.diff }}
+      - run: uv cache prune --ci
 
   push:
     if: >-
