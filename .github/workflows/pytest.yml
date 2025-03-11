@@ -69,6 +69,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
+          cache-suffix: group-test
       - uses: ComPWA/actions/cache-sympy@v2
       - id: extra
         if: inputs.additional-extras

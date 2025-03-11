@@ -23,6 +23,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
+          cache-suffix: group-doc
       - if: inputs.apt-packages
         run: |
           sudo apt-get update -y

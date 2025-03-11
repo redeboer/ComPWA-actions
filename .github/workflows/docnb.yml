@@ -29,6 +29,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
+          cache-suffix: group-doc
       - name: Fetch Jupyter cache
         if: inputs.specific-pip-packages == ''
         uses: actions/cache@v4
